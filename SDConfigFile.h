@@ -15,6 +15,7 @@
 
 #include <Arduino.h>
 #include <SD.h>
+#include <Ethernet.h>
 
 class SDConfigFile {
   private:
@@ -36,6 +37,7 @@ class SDConfigFile {
     const char *getName();
     const char *getValue();
     int getIntValue();
+    IPAddress getIPAddress();
     boolean getBooleanValue();
     char *copyValue();
 };

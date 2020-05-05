@@ -257,6 +257,26 @@ int SDConfigFile::getIntValue() {
   return atoi(str);
 }
 
+IPAddress SDConfigFile::getIPAddress(){
+  IPAddress ip(0,0,0,0);
+  const char *str = getValue();
+  int len = strlen(str);
+  char ipStr[len+1];
+  strncpy(ipStr,str,len); //char * strcpy ( char * destination, const char * source ); It is necessary to make a copy
+  ipStr[len] = '\0';
+  int i=0; int tmp;
+  const char *token = strtok(ipStr, ".");
+  while (token != NULL ) {
+    tmp = atoi(token);
+    if(tmp < 0 || tmp > 255 || i > 3){
+      ip={0,0,0,0};
+      return ip; //IP does not have more than four octets and its values are smaller than 256
+    }
+    ip[i++] = (byte) tmp;
+    token = strtok(NULL, ".");
+  }
+  return ip;
+}
 /*
  * Returns the value part of the most-recently-read setting
  * as a boolean.
