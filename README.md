@@ -1,50 +1,62 @@
-# SDConfigFile
+# SDConfig
 
 ## Introduction
 
-SDConfigFile is an Arduino library to read Sketch settings from a configuration file on an SD card.
+SDConfig is an Arduino library for reading settings from a configuration file on an SD card.
 
-I wrote the library so that I didn't have to hard-code private WiFi settings in my Sketches.  Instead, I have a config.cfg file on an SD card, that contains things like:
+It is based in SDConfigFile library by Bradford Needham (https://github.com/bneedhamia/sdconfigfile)
 
-    ssid=wickedOz
-    password=flyingMonkeys
+Given a configuration file with settings whose format is:
 
-Now I can change the WiFi settings, or any other configuration, by simply editing the SD card's **config.cfg** file.
+    # for comments
+    setting=value
 
-## Installation
+    # this is an example
 
-To install SDConfigFile on Windows:
+    # for any string
+    setting1=some_string
+    # able to be parsed as a boolean
+    setting2=true
+    # able to be parsed as an integer
+    setting3=123
+    # able to be parsed as an IP address
+    setting4=10.1.1.2
 
-1. Run git bash (or whatever git client you like)
-1. cd Documents/Arduino/libraries
-1. git clone https://github.com/bneedhamia/sdconfigfile.git SDConfigFile
-1. restart your Arduino IDE
+It is necessary to specify the configuration file name (i.e. **config.cfg**) to load its contents through the library methods.
 
-To install SDConfigFile on Linux:
+## Usage
 
-1. cd sketchbook/libraries
-1. git clone https://github.com/bneedhamia/sdconfigfile.git SDConfigFile
-1. restart your Arduino IDE
-
-## To use
-
-See **examples/SDConfigFileExample** for a simple example Sketch and its .cfg file.  See readConfiguration() in that sketch for the code that reads the settings from the .cfg file.
-
-The basic flow of reading a configuration file is:
+The following code shows the basic usage of the library taking the settings from the previous configuration file example:
 
     #include <SD.h>
-    #include <SDConfigFile.h>
+    #include <SDConfig.h>
 
-    SDConfigFile cfg;
-    
-    SD.begin(...);
-    cfg.begin(...);
-    while (cfg.readNextSetting()) {
-      if (cfg.nameIs("mySetting1")) {
-        call cfg.copyValue(),
-             cfg.getBooleanValue(), or
-             cfg.getIntValue(), as appropriate;
-      }
-      ...do the same for the other setting names.
+    SDConfig cfg;
+
+    setup(){
+      int pinSelect = 4;
+      int maxLineLength = 10;
+      SD.begin(pinSelect);
     }
-    cfg.end();
+    
+    loop(){
+      //Initialize SDConfig object
+      if(cfg.begin(fileName, maxLineLength)) { 
+        while (cfg.readNextSetting()) {
+          if(cfg.nameIs("setting1")){
+            char *string = cfg.copyValue();
+          }else if (cfg.nameIs("setting2")) {
+            boolean bool = cfg.getBooleanValue();
+          }else if(cfg.nameIs("setting3")){
+              int i = cfg.getIntValue();
+          }else if(cfg.nameIs("setting4")){
+              IPAddress ip = cfg.getIPAddress();
+          }else{
+            Serial.Print("The name of this setting is:");
+            Serial.println(cfg.getName());
+          }
+        }
+      cfg.end();
+      }
+      //Sentences using the initialised variables
+    }
