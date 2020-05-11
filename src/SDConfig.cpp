@@ -76,7 +76,7 @@ void SDConfig::end() {
  * false if an error occurred or end-of-file occurred.
  */
 boolean SDConfig::readNextSetting() {
-  int bint;
+  char chRead;
   
   if (_atEnd) {
     return false;  // already at end of file (or error).
@@ -92,21 +92,21 @@ boolean SDConfig::readNextSetting() {
    * or get to the end of file.
    */
   while (true) {
-    bint = _file.read();
-    if (bint < 0) {
+    chRead = _file.read();
+    if (chRead < 0) {
       _atEnd = true;
       return false;
     }
     
-    if ((char) bint == '#') {
+    if ((char) chRead == '#') {
       // Comment line.  Read until end of line or end of file.
       while (true) {
-        bint = _file.read();
-        if (bint < 0) {
+        chRead = _file.read();
+        if (chRead < 0) {
           _atEnd = true;
           return false;
         }
-        if ((char) bint == '\r' || (char) bint == '\n') {
+        if ((char) chRead == '\r' || (char) chRead == '\n') {
           break;
         }
       }
@@ -114,17 +114,17 @@ boolean SDConfig::readNextSetting() {
     }
     
     // Ignore line ends and blank text
-    if ((char) bint == '\r' || (char) bint == '\n'
-        || (char) bint == ' ' || (char) bint == '\t') {
+    if ((char) chRead == '\r' || (char) chRead == '\n'
+        || (char) chRead == ' ' || (char) chRead == '\t') {
       continue;
     }
         
-    break; // bint contains the first character of the name
+    break; // chRead contains the first character of the name
   }
   
   // Copy from this first character to the end of the line.
 
-  while (bint >= 0 && (char) bint != '\r' && (char) bint != '\n') {
+  while (chRead >= 0 && (char) chRead != '\r' && (char) chRead != '\n') {
     if (_lineLength >= _lineSize - 1) { // -1 for a terminating null.
       _line[_lineLength] = '\0';
 #ifdef SDCONFIG_DEBUG
@@ -135,19 +135,19 @@ boolean SDConfig::readNextSetting() {
       return false;
     }
     
-    if ((char) bint == '=') {
+    if ((char) chRead == '=') {
       // End of Name; the next character starts the value.
       _line[_lineLength++] = '\0';
       _valueIndex = _lineLength;
       
     } else {
-      _line[_lineLength++] = (char) bint;
+      _line[_lineLength++] = (char) chRead;
     }
     
-    bint = _file.read();
+    chRead = _file.read();
   }
   
-  if (bint < 0) {
+  if (chRead < 0) {
     _atEnd = true;
     // Don't exit. This is a normal situation:
     // the last line doesn't end in newline.

@@ -23,7 +23,7 @@ class SDConfig {
                            // Allocated by begin().
     uint8_t _lineSize;     // size (bytes) of _line[]
     uint8_t _lineLength;   // length (bytes) of the current line so far.
-    uint8_t _valueIndex;     // position in _line[] where the value starts
+    int8_t _valueIndex;     // position in _line[] where the value starts
                            //  (or -1 if none)
                            // (the name part is at &_line[0])
   
