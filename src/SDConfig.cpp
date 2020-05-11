@@ -1,13 +1,11 @@
 /*
- * SD card configuration file reading library
- *
- * Copyright (c) 2014 Bradford Needham
- * (@bneedhamia, https://www.needhamia.com )
+ * Library for reading settings from a configuration file stored in a SD
+ * Based in SDConfigFile by Bradford Needham (https://github.com/bneedhamia/sdconfigfile)
  * Licensed under LGPL version 2.1
  * a version of which should have been supplied with this file.
  */
  
-#include <SDConfigFile.h>
+#include <SDConfig.h>
 
 /*
  * Opens the given file on the SD card.
@@ -17,10 +15,10 @@
  *
  * NOTE: SD.begin() must be called before calling our begin().
  */
-boolean SDConfigFile::begin(const char *configFileName, uint8_t maxLineLength) {
+boolean SDConfig::begin(const char *configFileName, uint8_t maxLineLength) {
   _lineLength = 0;
   _lineSize = 0;
-  _valueIdx = -1;
+  _valueIndex = -1;
   _atEnd = true;
 
   /*
@@ -29,7 +27,7 @@ boolean SDConfigFile::begin(const char *configFileName, uint8_t maxLineLength) {
   _lineSize = maxLineLength + 1;
   _line = (char *) malloc(_lineSize);
   if (_line == 0) {
-#ifdef SDCONFIGFILE_DEBUG
+#ifdef SDCONFIG_DEBUG
     Serial.println("out of memory");
 #endif
     _atEnd = true;
@@ -43,7 +41,7 @@ boolean SDConfigFile::begin(const char *configFileName, uint8_t maxLineLength) {
    
   _file = SD.open(configFileName, FILE_READ);
   if (!_file) {
-#ifdef SDCONFIGFILE_DEBUG
+#ifdef SDCONFIG_DEBUG
     Serial.print("Could not open SD file: ");
     Serial.println(configFileName);
 #endif
@@ -60,7 +58,7 @@ boolean SDConfigFile::begin(const char *configFileName, uint8_t maxLineLength) {
 /*
  * Cleans up our SDCOnfigFile object.
  */
-void SDConfigFile::end() {
+void SDConfig::end() {
   if (_file) {
     _file.close();
   }
@@ -77,7 +75,7 @@ void SDConfigFile::end() {
  * Returns true if the setting was successfully read,
  * false if an error occurred or end-of-file occurred.
  */
-boolean SDConfigFile::readNextSetting() {
+boolean SDConfig::readNextSetting() {
   int bint;
   
   if (_atEnd) {
@@ -85,7 +83,7 @@ boolean SDConfigFile::readNextSetting() {
   }
   
   _lineLength = 0;
-  _valueIdx = -1;
+  _valueIndex = -1;
   
   /*
    * Assume beginning of line.
@@ -129,7 +127,7 @@ boolean SDConfigFile::readNextSetting() {
   while (bint >= 0 && (char) bint != '\r' && (char) bint != '\n') {
     if (_lineLength >= _lineSize - 1) { // -1 for a terminating null.
       _line[_lineLength] = '\0';
-#ifdef SDCONFIGFILE_DEBUG
+#ifdef SDCONFIG_DEBUG
       Serial.print("Line too long: ");
       Serial.println(_line);
 #endif
@@ -140,7 +138,7 @@ boolean SDConfigFile::readNextSetting() {
     if ((char) bint == '=') {
       // End of Name; the next character starts the value.
       _line[_lineLength++] = '\0';
-      _valueIdx = _lineLength;
+      _valueIndex = _lineLength;
       
     } else {
       _line[_lineLength++] = (char) bint;
@@ -162,24 +160,24 @@ boolean SDConfigFile::readNextSetting() {
    *   No name
    * It's OK to have a null value (nothing after the '=')
    */
-  if (_valueIdx < 0) {
-#ifdef SDCONFIGFILE_DEBUG
+  if (_valueIndex < 0) {
+#ifdef SDCONFIG_DEBUG
     Serial.print("Missing '=' in line: ");
     Serial.println(_line);
 #endif
     _atEnd = true;
     return false;
   }
-  if (_valueIdx == 1) {
-#ifdef SDCONFIGFILE_DEBUG
+  if (_valueIndex == 1) {
+#ifdef SDCONFIG_DEBUG
     Serial.print("Missing Name in line: =");
-    Serial.println(_line[_valueIdx]);
+    Serial.println(_line[_valueIndex]);
 #endif
     _atEnd = true;
     return false;
   }
   
-  // Name starts at _line[0]; Value starts at _line[_valueIdx].
+  // Name starts at _line[0]; Value starts at _line[_valueIndex].
   return true;
 
 }
@@ -188,7 +186,7 @@ boolean SDConfigFile::readNextSetting() {
  * Returns true if the most-recently-read setting name
  * matches the given name, false otherwise.
  */
-boolean SDConfigFile::nameIs(const char *name) {
+boolean SDConfig::nameIs(const char *name) {
   if (strcmp(name, _line) == 0) {
     return true;
   }
@@ -200,8 +198,8 @@ boolean SDConfigFile::nameIs(const char *name) {
  * or null if an error occurred.
  * WARNING: calling this when an error has occurred can crash your sketch.
  */
-const char *SDConfigFile::getName() {
-  if (_lineLength <= 0 || _valueIdx <= 1) {
+const char *SDConfig::getName() {
+  if (_lineLength <= 0 || _valueIndex <= 1) {
     return 0;
   }
   return &_line[0];
@@ -212,11 +210,11 @@ const char *SDConfigFile::getName() {
  * or null if there was an error.
  * WARNING: calling this when an error has occurred can crash your sketch.
  */
-const char *SDConfigFile::getValue() {
-  if (_lineLength <= 0 || _valueIdx <= 1) {
+const char *SDConfig::getValue() {
+  if (_lineLength <= 0 || _valueIndex <= 1) {
     return 0;
   }
-  return &_line[_valueIdx];
+  return &_line[_valueIndex];
 }
 
 /*
@@ -226,21 +224,21 @@ const char *SDConfigFile::getValue() {
  * Unlike getValue(), the return value of this function
  * persists after readNextSetting() is called or end() is called.
  */
-char *SDConfigFile::copyValue() {
+char *SDConfig::copyValue() {
   char *result = 0;
   int length;
 
-  if (_lineLength <= 0 || _valueIdx <= 1) {
+  if (_lineLength <= 0 || _valueIndex <= 1) {
     return 0; // begin() wasn't called, or failed.
   }
 
-  length = strlen(&_line[_valueIdx]);
+  length = strlen(&_line[_valueIndex]);
   result = (char *) malloc(length + 1);
   if (result == 0) {
     return 0; // out of memory
   }
   
-  strcpy(result, &_line[_valueIdx]);
+  strcpy(result, &_line[_valueIndex]);
 
   return result;
 }
@@ -249,7 +247,7 @@ char *SDConfigFile::copyValue() {
  * Returns the value part of the most-recently-read setting
  * as an integer, or 0 if an error occurred.
  */
-int SDConfigFile::getIntValue() {
+int SDConfig::getIntValue() {
   const char *str = getValue();
   if (!str) {
     return 0;
@@ -257,7 +255,7 @@ int SDConfigFile::getIntValue() {
   return atoi(str);
 }
 
-IPAddress SDConfigFile::getIPAddress(){
+IPAddress SDConfig::getIPAddress(){
   IPAddress ip(0,0,0,0);
   const char *str = getValue();
   int len = strlen(str);
@@ -283,7 +281,7 @@ IPAddress SDConfigFile::getIPAddress(){
  * The value "true" corresponds to true;
  * all other values correspond to false.
  */
-boolean SDConfigFile::getBooleanValue() {
+boolean SDConfig::getBooleanValue() {
   if (strcmp("true", getValue()) == 0) {
     return true;
   }
