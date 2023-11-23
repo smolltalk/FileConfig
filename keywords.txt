@@ -1,7 +1,10 @@
-SDConfigFile	KEYWORD1
+FileConfig	KEYWORD1
 begin	KEYWORD2
 end	KEYWORD2
 readNextSetting	KEYWORD2
 getName	KEYWORD2
 getValue	KEYWORD2
 copyValue	KEYWORD2
+getSection  KEYWORD2
+getBooleanValue KEYWORD2
+getIntValue KEYWORD2

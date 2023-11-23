@@ -1,19 +1,14 @@
-# FileConfig
+/*
+  FileConfig usage example.
 
-## Introduction
+  FileConfig is a library for reading settings from a configuration file stored in a FS (ex: SD or SD_MMC).
+  Based on SDConfig by Claus Mancini (https://https://github.com/Fuzzer11/SDconfig)
+  Based on SDConfigFile by Bradford Needham (https://github.com/bneedhamia/sdconfigfile)
+  Licensed under LGPL version 2.1
+  a version of which should have been supplied with this file.
 
-FileConfig is an Arduino library for reading settings from a configuration file on an SD card.  
-It is based on SDFileConfig library by Claus Mancini (https://https://github.com/Fuzzer11/SDconfig).
+  This example requires on the SD card the file named 'example.cfg' with the following content: 
 
-It brings up the following improvements and features:  
-- support of section to organize key/value pairs
-- case insensivity option on key name matching
-- support of blank between the key, '=' and the value
-- ignore error option on badly formatted line and continue to the next valid key/value pair
-- since you now provide a FS, this library works fine with SD_MMC and not only SD
-
-Given a configuration file with settings whose format is:
-```
 # for comments
 setting=value
 
@@ -41,16 +36,9 @@ setting5   = 123
 # able to be parsed as an IP address
 setting6   = 10.1.1.2
 # duplicated setting in different section
-dupSetting = Value2  
-```
+dupSetting = Value2
+*/
 
-It is necessary to specify the configuration file name (ex: **example.cfg**) to load its contents through the library methods.
-
-## Usage
-
-The following code shows the basic usage of the library taking the settings from the previous configuration file example:
-
-```C
 #include <SD_MMC.h>
 #include <FileConfig.h>
 
@@ -100,4 +88,3 @@ void setup() {
 
 void loop() {
 }
-```
