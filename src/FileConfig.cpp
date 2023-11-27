@@ -111,13 +111,13 @@ boolean FileConfig::readNextSetting()
     return false; // already at end of file (or error).
   }
 
+  _sectionChanged = false;
   bool settingFound = false;
   while (!(_atEnd || settingFound))
   {
     int readValue = 0;
     _valueIndex = -1;
     _lineLength = 0;
-    _sectionChanged = false;
     char *buffer = NULL;
     uint8_t bufferSize = 0;
     bool isSection = false;
@@ -309,6 +309,15 @@ const char *FileConfig::getSection()
 boolean FileConfig::sectionIs(const char *section)
 {
   return _strcmp(section, _section) == 0;
+}
+
+/*
+ * Returns true if the most-recently-read setting is
+ * in a new section.
+ */
+boolean FileConfig::sectionChanged()
+{
+  return _sectionChanged;
 }
 
 /*
